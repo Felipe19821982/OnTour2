@@ -1,4 +1,5 @@
 from django.urls import path
+from django.contrib.auth import views as auth_views
 from . import views 
 
 urlpatterns = [
@@ -22,6 +23,7 @@ urlpatterns = [
     path('alumnos_del/<str:pk>/', views.alumnos_del, name='alumnos_del'),
     path('alumnos_findEdit/<str:pk>/', views.alumnos_finEdit, name='alumnos_findEdit'),
     path('alumnosUpdate/', views.alumnosUpdate, name='alumnosUpdate'),  
+    path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
 
         # Nuevas páginas para el Panel de Usuario
     # Apoderados
