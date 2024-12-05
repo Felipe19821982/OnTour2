@@ -245,3 +245,56 @@ def alumnosUpdate(request):
         postulantes = Postulante.objects.all()
         context = {'postulantes': postulantes}
         return render(request, 'demo/alumnos_list.html', context)
+    
+
+
+    # Nuevas vistas del Panel de Usuario
+@login_required
+def estado_cuenta_apoderado(request):
+    context = {"clase": "estado_cuenta_apoderado"}
+    return render(request, 'panel/apoderados/estado_cuenta.html', context)
+
+@login_required
+def deposito_individual(request):
+    context = {"clase": "deposito_individual"}
+    return render(request, 'panel/apoderados/deposito_individual.html', context)
+
+@login_required
+def seguros_apoderado(request):
+    context = {"clase": "seguros_apoderado"}
+    return render(request, 'panel/apoderados/seguros.html', context)
+
+@login_required
+def progreso_meta(request):
+    context = {"clase": "progreso_meta"}
+    return render(request, 'panel/apoderados/progreso_meta.html', context)
+
+@login_required
+def deposito_colectivo(request):
+    context = {"clase": "deposito_colectivo"}
+    return render(request, 'panel/curso/deposito_colectivo.html', context)
+
+@login_required
+def reporte_financiero_curso(request):
+    context = {"clase": "reporte_financiero_curso"}
+    return render(request, 'panel/curso/reporte_financiero.html', context)
+
+@login_required
+def comunicacion_ejecutivo(request):
+    context = {"clase": "comunicacion_ejecutivo"}
+    return render(request, 'panel/curso/comunicacion.html', context)
+
+@login_required
+def gestion_contratos(request):
+    context = {"clase": "gestion_contratos"}
+    return render(request, 'panel/ejecutivos/gestion_contratos.html', context)
+
+@login_required
+def seguimiento_depositos(request):
+    context = {"clase": "seguimiento_depositos"}
+    return render(request, 'panel/ejecutivos/seguimiento_depositos.html', context)
+
+@login_required
+def informacion_seguros(request):
+    context = {"clase": "informacion_seguros"}
+    return render(request, 'panel/ejecutivos/informacion_seguros.html', context)

@@ -29,94 +29,68 @@
 					<!-- Nav -->
 					<nav id="nav">
 						<ul>
-							<li {%if clase == 'inicio'%}
-								class="current" {%endif%}><a href="/">Inicio</a></li>
-								<li>
-									<a href="#">Productos</a>
-									<ul>
-										<li><a href="{% url 'vinilo'%}">Vinilos</a></li>
-										<li><a href="{% url 'cd'%}">CD</a></li>
-										<li><a href="{% url 'cassette'%}">Cassette</a></li>
-										<li><a href="{% url 'comprar'%}">Todo</a></li>
-									</ul>
-								</li>
-							<li {%if clase == 'trabaja'%}
-								class="current" {%endif%}><a href="{% url 'trabaja'%}">Trabaja Aquí</a></li>
-
-								<li>
-									<li {%if clase == 'contactanos'%}
-									class="current" {%endif%}><a href="{% url 'contactanos'%}">Contactanos</a></li>
-	
-									<li>
-									{% if user.is_authenticated %}
-									
-									<a href="#">{{user.username}}</a>
-									<ul>
-										<li class="nav-item">
-										<a href="{% url 'perfil'%}">Mi Perfil</a>
-									</li>
-										<form id="logoutForm" action="accounts/logout/" method="post" class="navbar-right">
-											{% csrf_token %}
-									        <li ><a href="javascript:document.getElementById('logoutForm').submit()">Logout</a></li>
-											</ul>
-										</form>
-
-									
-									{% else %}
-									<li class="nav-item">
-										<a href="{% url 'login'%}">Login</a>
-									  </li>
-									{% endif %}
-								</li>
-								<li {%if clase == 'galeria'%}
-                                class="current" {%endif%}><a href="{% url 'galeria'%}">Galeria</a></li>
-								{% if user.is_authenticated %}
-
-								{% else %}
-								<li {%if clase == 'registro'%}
-                                class="current" {%endif%}><a href="{% url 'registro'%}">Registro</a></li>
-								{% endif %}
-								 {% comment %} <li><a href="two-sidebar.html">Two Sidebar</a></li>
-								<li><a href="no-sidebar.html">No Sidebar</a></li>  {% endcomment %}					<li {%if clase == 'comprar'%}
-								class="current" {%endif%}><a href="{% url 'comprar'%}">Comprar</a>								
+							<li {%if clase == 'inicio'%} class="current" {%endif%}><a href="/">Inicio</a></li>
+							<li>
+								<a href="#">Productos</a>
 								<ul>
-									<li>
-					
-										<div>
-											<ul>
-												<li class="submenu">
-													<div id="carrito">
-														<table id="lista-carrito">
-															<thead>
-																<tr>
-																	<th>Imagen</th>
-																	<th>Nombre</th>
-																	<th>Precio</th>
-																	<th></th>
-																</tr>
-															</thead>
-															<tbody></tbody>
-														</table>
-														<a href="#" id="vaciar-carrito" class="btn-3">Vaciar Carrito</a>
-													</div>
-												</li>
-											</ul>
-										</div>
-									</li>
-									<li>
-										<a href="{% url 'comprar'%}">Productos</a>
-										<ul>
-											<li><a href="{% url 'vinilo'%}">Vinilos</a></li>
-											<li><a href="{% url 'cd'%}">CD</a></li>
-											<li><a href="{% url 'cassette'%}">Cassette</a></li>
-											<li><a href="{% url 'comprar'%}">Todo</a></li>
-										</ul>
-									</li>
+									<li><a href="{% url 'vinilo'%}">Vinilos</a></li>
+									<li><a href="{% url 'cd'%}">CD</a></li>
+									<li><a href="{% url 'cassette'%}">Cassette</a></li>
+									<li><a href="{% url 'comprar'%}">Todo</a></li>
 								</ul>
 							</li>
-
+							<li {%if clase == 'trabaja'%} class="current" {%endif%}><a href="{% url 'trabaja'%}">Trabaja Aquí</a></li>
+							<li {%if clase == 'contactanos'%} class="current" {%endif%}><a href="{% url 'contactanos'%}">Contactanos</a></li>
+							<li {%if clase == 'galeria'%} class="current" {%endif%}><a href="{% url 'galeria'%}">Galeria</a></li>
+							
+							{% if user.is_authenticated %}
+								<li>
+									<a href="#">Panel de Usuario</a>
+									<ul>
+										<li>
+											<a href="#">Apoderados</a>
+											<ul>
+												<li><a href="{% url 'estado_cuenta_apoderado' %}">Estado de Cuenta</a></li>
+												<li><a href="{% url 'deposito_individual' %}">Registrar Depósito</a></li>
+												<li><a href="{% url 'seguros_apoderado' %}">Seguros Contratados</a></li>
+												<li><a href="{% url 'progreso_meta' %}">Progreso Financiero</a></li>
+											</ul>
+										</li>
+										<li>
+											<a href="#">Representantes del Curso</a>
+											<ul>
+												<li><a href="{% url 'deposito_colectivo' %}">Depósitos Colectivos</a></li>
+												<li><a href="{% url 'reporte_financiero_curso' %}">Reporte Financiero</a></li>
+												<li><a href="{% url 'comunicacion_ejecutivo' %}">Comunicación con Ejecutivo</a></li>
+											</ul>
+										</li>
+										<li>
+											<a href="#">Ejecutivos de la Agencia</a>
+											<ul>
+												<li><a href="{% url 'gestion_contratos' %}">Gestión de Contratos</a></li>
+												<li><a href="{% url 'seguimiento_depositos' %}">Seguimiento de Depósitos</a></li>
+												<li><a href="{% url 'informacion_seguros' %}">Información de Seguros</a></li>
+											</ul>
+										</li>
+									</ul>
+								</li>
+								<li>
+									<a href="#">{{ user.username }}</a>
+									<ul>
+										<li><a href="{% url 'perfil' %}">Mi Perfil</a></li>
+										<form id="logoutForm" action="accounts/logout/" method="post">
+											{% csrf_token %}
+											<li><a href="javascript:document.getElementById('logoutForm').submit()">Logout</a></li>
+										</form>
+									</ul>
+								</li>
+							{% else %}
+								<li><a href="{% url 'login' %}">Login</a></li>
+								<li><a href="{% url 'registro' %}">Registro</a></li>
+							{% endif %}
 						</ul>
 					</nav>
+					
 			</div>
 		</div>
 
