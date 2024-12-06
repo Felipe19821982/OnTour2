@@ -302,24 +302,25 @@ def informacion_seguros(request):
 
 
 from django.shortcuts import render
+from demo.models import Colegio, Curso, Alumno
 from django.contrib.auth.models import User
-from .models import Colegio, Curso, Alumno
 
 def registro(request):
     colegios = Colegio.objects.all()
+    cursos = Curso.objects.all()
 
     if request.method == "POST":
-        # Datos del apoderado
+        # Datos básicos
         nombre = request.POST.get("nombre")
         email = request.POST.get("email")
         password = request.POST.get("password")
 
-        # Datos del colegio, curso y alumnos
+        # Colegio y curso
         colegio_id = request.POST.get("colegio")
         curso_id = request.POST.get("curso")
-        nuevo_colegio = request.POST.get("nuevo_colegio")  # Nuevo colegio, si se proporciona
+        nuevo_colegio = request.POST.get("nuevo_colegio")
 
-        # Nombres de los alumnos
+        # Alumnos
         alumnos = [
             request.POST.get("alumno_1"),
             request.POST.get("alumno_2"),
@@ -330,37 +331,70 @@ def registro(request):
 
         # Validaciones
         if not alumnos:
-            mensaje = "Por favor, ingresa al menos un nombre de alumno."
-            return render(request, 'demo/registro.html', {'mensaje': mensaje, 'colegios': colegios})
+            return render(request, 'demo/registro.html', {
+                'mensaje': "Debes registrar al menos un pupilo.",
+                'colegios': colegios,
+                'cursos': cursos
+            })
 
         if colegio_id and nuevo_colegio:
-            mensaje = "Por favor, selecciona un colegio existente o agrega uno nuevo, pero no ambos."
-            return render(request, 'demo/registro.html', {'mensaje': mensaje, 'colegios': colegios})
+            return render(request, 'demo/registro.html', {
+                'mensaje': "Selecciona un colegio existente o agrega uno nuevo, no ambos.",
+                'colegios': colegios,
+                'cursos': cursos
+            })
 
         if not colegio_id and not nuevo_colegio:
-            mensaje = "Por favor, selecciona un colegio existente o agrega uno nuevo."
-            return render(request, 'demo/registro.html', {'mensaje': mensaje, 'colegios': colegios})
+            return render(request, 'demo/registro.html', {
+                'mensaje': "Selecciona un colegio existente o agrega uno nuevo.",
+                'colegios': colegios,
+                'cursos': cursos
+            })
 
-        # Crear o seleccionar el colegio
+        # Manejo del colegio
         if nuevo_colegio:
             colegio = Colegio.objects.create(nombre=nuevo_colegio)
         else:
-            colegio = Colegio.objects.get(id=colegio_id)
+            try:
+                colegio = Colegio.objects.get(id=colegio_id)
+            except Colegio.DoesNotExist:
+                return render(request, 'demo/registro.html', {
+                    'mensaje': "El colegio seleccionado no existe.",
+                    'colegios': colegios,
+                    'cursos': cursos
+                })
 
-        # Seleccionar el curso
-        curso = Curso.objects.get(id=curso_id)
+        # Manejo del curso
+        if not curso_id:
+            return render(request, 'demo/registro.html', {
+                'mensaje': "Selecciona un curso.",
+                'colegios': colegios,
+                'cursos': cursos
+            })
+
+        try:
+            curso = Curso.objects.get(id=curso_id)
+        except Curso.DoesNotExist:
+            return render(request, 'demo/registro.html', {
+                'mensaje': "El curso seleccionado no existe.",
+                'colegios': colegios,
+                'cursos': cursos
+            })
 
         # Crear usuario
         user = User.objects.create_user(username=nombre, email=email, password=password)
 
-        # Crear los alumnos
+        # Crear alumnos
         for alumno_nombre in alumnos:
             Alumno.objects.create(nombre=alumno_nombre, curso=curso, apoderado=user)
 
-        mensaje = f"Usuario {nombre} registrado con éxito. Se registraron {len(alumnos)} pupilos."
-        return render(request, 'demo/registro.html', {'mensaje': mensaje, 'colegios': colegios})
+        return render(request, 'demo/registro.html', {
+            'mensaje': f"Usuario {nombre} registrado con éxito. Pupilos registrados: {len(alumnos)}.",
+            'colegios': colegios,
+            'cursos': cursos
+        })
 
-    return render(request, 'demo/registro.html', {'colegios': colegios})
+    return render(request, 'demo/registro.html', {'colegios': colegios, 'cursos': cursos})
 
 
 
