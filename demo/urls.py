@@ -41,6 +41,9 @@ urlpatterns = [
     path('panel/ejecutivos/gestion_contratos/', views.gestion_contratos, name='gestion_contratos'),
     path('panel/ejecutivos/seguimiento_depositos/', views.seguimiento_depositos, name='seguimiento_depositos'),
     path('panel/ejecutivos/informacion_seguros/', views.informacion_seguros, name='informacion_seguros'),
+
+
+    path('get-cursos/<int:colegio_id>/', views.get_cursos, name='get_cursos'),
 ]
 
 

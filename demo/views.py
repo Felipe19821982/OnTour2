@@ -298,3 +298,178 @@ def seguimiento_depositos(request):
 def informacion_seguros(request):
     context = {"clase": "informacion_seguros"}
     return render(request, 'panel/ejecutivos/informacion_seguros.html', context)
+
+
+
+from django.shortcuts import render
+from django.contrib.auth.models import User
+from .models import Colegio, Curso, Alumno
+
+def registro(request):
+    colegios = Colegio.objects.all()
+
+    if request.method == "POST":
+        # Datos del apoderado
+        nombre = request.POST.get("nombre")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+
+        # Datos del colegio, curso y alumnos
+        colegio_id = request.POST.get("colegio")
+        curso_id = request.POST.get("curso")
+        nuevo_colegio = request.POST.get("nuevo_colegio")  # Nuevo colegio, si se proporciona
+
+        # Nombres de los alumnos
+        alumnos = [
+            request.POST.get("alumno_1"),
+            request.POST.get("alumno_2"),
+            request.POST.get("alumno_3"),
+            request.POST.get("alumno_4"),
+        ]
+        alumnos = [alumno for alumno in alumnos if alumno]  # Filtrar nombres vacíos
+
+        # Validaciones
+        if not alumnos:
+            mensaje = "Por favor, ingresa al menos un nombre de alumno."
+            return render(request, 'demo/registro.html', {'mensaje': mensaje, 'colegios': colegios})
+
+        if colegio_id and nuevo_colegio:
+            mensaje = "Por favor, selecciona un colegio existente o agrega uno nuevo, pero no ambos."
+            return render(request, 'demo/registro.html', {'mensaje': mensaje, 'colegios': colegios})
+
+        if not colegio_id and not nuevo_colegio:
+            mensaje = "Por favor, selecciona un colegio existente o agrega uno nuevo."
+            return render(request, 'demo/registro.html', {'mensaje': mensaje, 'colegios': colegios})
+
+        # Crear o seleccionar el colegio
+        if nuevo_colegio:
+            colegio = Colegio.objects.create(nombre=nuevo_colegio)
+        else:
+            colegio = Colegio.objects.get(id=colegio_id)
+
+        # Seleccionar el curso
+        curso = Curso.objects.get(id=curso_id)
+
+        # Crear usuario
+        user = User.objects.create_user(username=nombre, email=email, password=password)
+
+        # Crear los alumnos
+        for alumno_nombre in alumnos:
+            Alumno.objects.create(nombre=alumno_nombre, curso=curso, apoderado=user)
+
+        mensaje = f"Usuario {nombre} registrado con éxito. Se registraron {len(alumnos)} pupilos."
+        return render(request, 'demo/registro.html', {'mensaje': mensaje, 'colegios': colegios})
+
+    return render(request, 'demo/registro.html', {'colegios': colegios})
+
+
+
+
+
+from django.http import JsonResponse
+from .models import Curso
+
+def get_cursos(request, colegio_id):
+    cursos = Curso.objects.filter(colegio_id=colegio_id)
+    cursos_data = [{"id": curso.id, "nombre": curso.nombre} for curso in cursos]
+    return JsonResponse({"cursos": cursos_data})
+
+
+
+
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Deposito, Fondo
+
+@login_required
+def estado_cuenta(request):
+    # Obtener depósitos del usuario
+    depositos = Deposito.objects.filter(apoderado=request.user)
+    total_apoderado = sum([deposito.monto for deposito in depositos])
+
+    # Calcular el total colectivo para los cursos del usuario
+    cursos = {deposito.curso for deposito in depositos}
+    total_colectivo = sum([curso.fondo.total_colectivo for curso in cursos])
+
+    context = {
+        'depositos': depositos,
+        'total_apoderado': total_apoderado,
+        'total_colectivo': total_colectivo
+    }
+    return render(request, 'panel/apoderados/estado_cuenta.html', context)
+
+
+
+from django.shortcuts import render, redirect
+from .models import Deposito, Fondo, Curso
+
+@login_required
+def registrar_deposito(request):
+    # Obtener los alumnos asociados al apoderado
+    alumnos = request.user.alumnos.all()
+
+    if not alumnos.exists():
+        return render(request, 'panel/apoderados/deposito_individual.html', {'mensaje': 'No tienes alumnos registrados.'})
+
+    if request.method == "POST":
+        alumno_id = request.POST.get("alumno")
+        monto = request.POST.get("monto")
+
+        # Validar que el alumno seleccionado pertenece al apoderado
+        try:
+            alumno = alumnos.get(id=alumno_id)
+        except Alumno.DoesNotExist:
+            return render(request, 'panel/apoderados/deposito_individual.html', {
+                'alumnos': alumnos,
+                'mensaje': 'El alumno seleccionado no es válido.'
+            })
+
+        # Validar que el monto sea un número válido
+        try:
+            monto = float(monto)
+        except ValueError:
+            return render(request, 'panel/apoderados/deposito_individual.html', {
+                'alumnos': alumnos,
+                'mensaje': 'Por favor, ingresa un monto válido.'
+            })
+
+        # Obtener el curso del alumno y su fondo colectivo
+        curso = alumno.curso
+        fondo, created = Fondo.objects.get_or_create(curso=curso)
+
+        # Crear el depósito
+        Deposito.objects.create(apoderado=request.user, monto=monto, curso=curso)
+
+        # Actualizar el fondo colectivo
+        fondo.total_colectivo += monto
+        fondo.save()
+
+        # Redirigir con mensaje de éxito
+        return redirect('estado_cuenta')
+
+    # Renderizar el formulario con la lista de alumnos
+    return render(request, 'panel/apoderados/deposito_individual.html', {'alumnos': alumnos})
+
+
+
+@login_required
+def progreso_financiero(request):
+    depositos = Deposito.objects.filter(apoderado=request.user)
+    total_apoderado = sum([deposito.monto for deposito in depositos])
+
+    cursos = {deposito.curso for deposito in depositos}
+    total_colectivo = sum([curso.fondo.total_colectivo for curso in cursos])
+
+    context = {
+        'total_apoderado': total_apoderado,
+        'total_colectivo': total_colectivo,
+    }
+    return render(request, 'panel/apoderados/progreso_meta.html', context)
+
+
+@login_required
+def seguros_contratados(request):
+    seguros = Seguro.objects.filter(apoderado=request.user)
+    context = {'seguros': seguros}
+    return render(request, 'panel/apoderados/seguros.html', context)

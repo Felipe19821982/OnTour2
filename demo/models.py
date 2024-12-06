@@ -40,3 +40,65 @@ class Postulante(models.Model):
     def __str__(self):
         return str(self.nombre)+" "+str(self.apellido_paterno)       
         
+
+
+
+
+class Colegio(models.Model):
+    nombre = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.nombre
+
+
+class Curso(models.Model):
+    nombre = models.CharField(max_length=50)
+    colegio = models.ForeignKey(Colegio, on_delete=models.CASCADE, related_name="cursos")
+
+    def __str__(self):
+        return f"{self.nombre} - {self.colegio.nombre}"
+
+
+
+from django.db import models
+from django.contrib.auth.models import User
+class Alumno(models.Model):
+    nombre = models.CharField(max_length=100)
+    curso = models.ForeignKey(Curso, on_delete=models.CASCADE, related_name="alumnos")
+    apoderado = models.ForeignKey(User, on_delete=models.CASCADE, related_name="alumnos")
+
+    def __str__(self):
+        return f"{self.nombre} ({self.curso.nombre})"
+    
+
+
+
+
+
+from django.db import models
+from django.contrib.auth.models import User
+from demo.models import Curso  # Asegúrate de tener un modelo Curso
+
+class Fondo(models.Model):
+    curso = models.OneToOneField(Curso, on_delete=models.CASCADE, related_name="fondo")
+    total_colectivo = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    def __str__(self):
+        return f"Fondo del curso {self.curso.nombre}"
+
+class Deposito(models.Model):
+    apoderado = models.ForeignKey(User, on_delete=models.CASCADE, related_name="depositos")
+    monto = models.DecimalField(max_digits=10, decimal_places=2)
+    fecha = models.DateTimeField(auto_now_add=True)
+    curso = models.ForeignKey(Curso, on_delete=models.CASCADE, related_name="depositos")
+
+    def __str__(self):
+        return f"Depósito de {self.monto} por {self.apoderado.username} ({self.fecha})"
+
+class Seguro(models.Model):
+    apoderado = models.ForeignKey(User, on_delete=models.CASCADE, related_name="seguros")
+    tipo = models.CharField(max_length=100)
+    fecha_contratado = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Seguro {self.tipo} contratado por {self.apoderado.username}"

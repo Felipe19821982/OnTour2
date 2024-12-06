@@ -1,11 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    
-</body>
-</html>
+{% extends "demo/base.html" %}
+{% block content %}
+<h2>Seguros Contratados</h2>
+<table>
+    <tr>
+        <th>Tipo</th>
+        <th>Fecha Contratado</th>
+    </tr>
+    {% for seguro in seguros %}
+    <tr>
+        <td>{{ seguro.tipo }}</td>
+        <td>{{ seguro.fecha_contratado }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

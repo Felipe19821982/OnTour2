@@ -1,13 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <h1>Estado de Cuenta del Apoderado</h1>
-    <p>Contenido de prueba para verificar que la plantilla carga correctamente.</p>
-    
-</body>
-</html>
+{% extends "demo/base.html" %}
+{% block content %}
+<h2>Estado de Cuenta</h2>
+<p><strong>Total Depositado:</strong> {{ total_apoderado }}</p>
+<p><strong>Total Colectivo:</strong> {{ total_colectivo }}</p>
+<table>
+    <tr>
+        <th>Fecha</th>
+        <th>Curso</th>
+        <th>Monto</th>
+    </tr>
+    {% for deposito in depositos %}
+    <tr>
+        <td>{{ deposito.fecha }}</td>
+        <td>{{ deposito.curso.nombre }}</td>
+        <td>{{ deposito.monto }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

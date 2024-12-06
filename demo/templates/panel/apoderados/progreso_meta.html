@@ -1,11 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    
-</body>
-</html>
+{% extends "demo/base.html" %}
+{% block content %}
+<h2>Progreso Financiero</h2>
+<p><strong>Progreso Individual:</strong> {{ total_apoderado }}</p>
+<p><strong>Progreso Colectivo:</strong> {{ total_colectivo }}</p>
+{% endblock %}

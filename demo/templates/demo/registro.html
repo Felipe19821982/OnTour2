@@ -13,24 +13,67 @@
     </div>
     {%endif%}
     <form action="" method="post">
-      {% csrf_token%}  
-        <div class="form-group">
+      {% csrf_token %}
+      <div class="form-group">
           <label for="nombre">Username</label>
-          <input type="text" class="form-control" id="nombre" name="nombre"  placeholder="Enter Username">
-        </div>
-        <div class="form-group">
-            <label for="email">Email address</label>
-            <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" placeholder="Enter email">
-            <small id="emailHelp" class="form-text text-muted"></small>
-          </div>
-        <div class="form-group">
+          <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Enter Username">
+      </div>
+      <div class="form-group">
+          <label for="email">Email address</label>
+          <input type="email" class="form-control" id="email" name="email" placeholder="Enter email">
+      </div>
+      <div class="form-group">
           <label for="password">Password</label>
           <input type="password" class="form-control" id="password" name="password" placeholder="Password">
-        </div>
-        <br><br>
-        <button type="submit" class="btn btn-primary">Guardar</button>
-      </form>
+      </div>
+      <div class="form-group">
+          <label for="colegio">Colegio</label>
+          <select class="form-control" id="colegio" name="colegio">
+              <option value="">-- Seleccione un Colegio --</option>
+              {% for colegio in colegios %}
+                  <option value="{{ colegio.id }}">{{ colegio.nombre }}</option>
+              {% endfor %}
+          </select>
+      </div>
+      <div class="form-group">
+          <label for="curso">Curso</label>
+          <select class="form-control" id="curso" name="curso">
+              <!-- Opciones serán cargadas dinámicamente con JavaScript -->
+          </select>
+      </div>
+      <div class="form-group">
+          <label for="alumnos">Nombres de los Pupilos (puedes ingresar hasta 4)</label>
+          <input type="text" class="form-control" id="alumno_1" name="alumno_1" placeholder="Nombre del Alumno 1">
+          <input type="text" class="form-control" id="alumno_2" name="alumno_2" placeholder="Nombre del Alumno 2">
+          <input type="text" class="form-control" id="alumno_3" name="alumno_3" placeholder="Nombre del Alumno 3">
+          <input type="text" class="form-control" id="alumno_4" name="alumno_4" placeholder="Nombre del Alumno 4">
+      </div>
+      <button type="submit" class="btn btn-primary">Guardar</button>
+  </form>
 </div>
+
+
+
+<script>
+  // Cargar cursos dinámicamente según el colegio seleccionado
+  document.getElementById('colegio').addEventListener('change', function() {
+      const colegioId = this.value;
+      fetch(`/get-cursos/${colegioId}/`)
+          .then(response => response.json())
+          .then(data => {
+              const cursoSelect = document.getElementById('curso');
+              cursoSelect.innerHTML = '';
+              data.cursos.forEach(curso => {
+                  const option = document.createElement('option');
+                  option.value = curso.id;
+                  option.textContent = curso.nombre;
+                  cursoSelect.appendChild(option);
+              });
+          });
+  });
+</script>
+
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <script>
