@@ -54,24 +54,41 @@
 
 
 
-<script>
-  // Cargar cursos dinámicamente según el colegio seleccionado
-  document.getElementById('colegio').addEventListener('change', function() {
-      const colegioId = this.value;
-      fetch(`/get-cursos/${colegioId}/`)
-          .then(response => response.json())
-          .then(data => {
-              const cursoSelect = document.getElementById('curso');
-              cursoSelect.innerHTML = '';
-              data.cursos.forEach(curso => {
-                  const option = document.createElement('option');
-                  option.value = curso.id;
-                  option.textContent = curso.nombre;
-                  cursoSelect.appendChild(option);
-              });
-          });
-  });
-</script>
+  <script>
+        document.getElementById('colegio').addEventListener('change', function() {
+          const colegioId = this.value;
+          const cursoSelect = document.getElementById('curso');
+      
+          // Limpiar el listado de cursos
+          cursoSelect.innerHTML = '<option value="">-- Selecciona un curso --</option>';
+      
+          if (colegioId) {
+              fetch(`/get_cursos/${colegioId}/`)
+                  .then(response => {
+                      if (!response.ok) {
+                          throw new Error("Error al cargar los cursos");
+                      }
+                      return response.json();
+                  })
+                  .then(data => {
+                      if (data.cursos.length === 0) {
+                          cursoSelect.innerHTML = '<option value="">No hay cursos disponibles</option>';
+                      } else {
+                          data.cursos.forEach(curso => {
+                              const option = document.createElement('option');
+                              option.value = curso.id;
+                              option.textContent = curso.nombre;
+                              cursoSelect.appendChild(option);
+                          });
+                      }
+                  })
+                  .catch(error => {
+                      console.error('Error al cargar los cursos:', error);
+                      alert("Hubo un error al cargar los cursos. Intenta nuevamente.");
+                  });
+          }
+      });
+  </script>
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
