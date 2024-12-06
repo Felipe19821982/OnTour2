@@ -78,9 +78,9 @@
 									<a href="#">{{ user.username }}</a>
 									<ul>
 										<li><a href="{% url 'perfil' %}">Mi Perfil</a></li>
-										<form id="logoutForm" action="accounts/logout/" method="post">
+										<form id="logoutForm" action="{% url 'logout' %}" method="post" class="navbar-right">
 											{% csrf_token %}
-											<li><a href="javascript:document.getElementById('logoutForm').submit()">Logout</a></li>
+											<button type="submit" class="btn btn-danger">Logout</button>
 										</form>
 									</ul>
 								</li>
