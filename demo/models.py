@@ -41,8 +41,8 @@ class Postulante(models.Model):
         return str(self.nombre)+" "+str(self.apellido_paterno)       
         
 
-
-
+from django.db import models
+from django.contrib.auth.models import User
 
 class Colegio(models.Model):
     nombre = models.CharField(max_length=100)
@@ -59,16 +59,6 @@ class Curso(models.Model):
         return f"{self.nombre} - {self.colegio.nombre}"
 
 
-
-from django.db import models
-from django.contrib.auth.models import User
-
-class Curso(models.Model):
-    nombre = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.nombre
-
 class Alumno(models.Model):
     nombre = models.CharField(max_length=100)
     curso = models.ForeignKey(Curso, on_delete=models.CASCADE, related_name="alumnos")
@@ -76,6 +66,10 @@ class Alumno(models.Model):
 
     def __str__(self):
         return f"{self.nombre} - {self.curso.nombre}"
+
+
+
+
 
 
 

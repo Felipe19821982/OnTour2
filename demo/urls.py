@@ -43,7 +43,7 @@ urlpatterns = [
     path('panel/ejecutivos/informacion_seguros/', views.informacion_seguros, name='informacion_seguros'),
 
 
-    path('get-cursos/<int:colegio_id>/', views.get_cursos, name='get_cursos'),
+    path('get-cursos/<int:colegio_id>/', views.get_cursos, name='get-cursos'),
 ]
 
 

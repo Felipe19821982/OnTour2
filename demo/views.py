@@ -301,114 +301,54 @@ def informacion_seguros(request):
 
 
 
-from django.shortcuts import render
-from demo.models import Colegio, Curso, Alumno
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from .models import Colegio, Curso, Alumno
 from django.contrib.auth.models import User
+from django.contrib import messages
 
 def registro(request):
     colegios = Colegio.objects.all()
-    cursos = Curso.objects.all()
 
     if request.method == "POST":
-        # Datos básicos
         nombre = request.POST.get("nombre")
         email = request.POST.get("email")
         password = request.POST.get("password")
-
-        # Colegio y curso
         colegio_id = request.POST.get("colegio")
         curso_id = request.POST.get("curso")
-        nuevo_colegio = request.POST.get("nuevo_colegio")
-
-        # Alumnos
-        alumnos = [
-            request.POST.get("alumno_1"),
-            request.POST.get("alumno_2"),
-            request.POST.get("alumno_3"),
-            request.POST.get("alumno_4"),
-        ]
-        alumnos = [alumno for alumno in alumnos if alumno]  # Filtrar nombres vacíos
 
         # Validaciones
-        if not alumnos:
-            return render(request, 'demo/registro.html', {
-                'mensaje': "Debes registrar al menos un pupilo.",
-                'colegios': colegios,
-                'cursos': cursos
-            })
-
-        if colegio_id and nuevo_colegio:
-            return render(request, 'demo/registro.html', {
-                'mensaje': "Selecciona un colegio existente o agrega uno nuevo, no ambos.",
-                'colegios': colegios,
-                'cursos': cursos
-            })
-
-        if not colegio_id and not nuevo_colegio:
-            return render(request, 'demo/registro.html', {
-                'mensaje': "Selecciona un colegio existente o agrega uno nuevo.",
-                'colegios': colegios,
-                'cursos': cursos
-            })
-
-        # Manejo del colegio
-        if nuevo_colegio:
-            colegio = Colegio.objects.create(nombre=nuevo_colegio)
-        else:
-            try:
-                colegio = Colegio.objects.get(id=colegio_id)
-            except Colegio.DoesNotExist:
-                return render(request, 'demo/registro.html', {
-                    'mensaje': "El colegio seleccionado no existe.",
-                    'colegios': colegios,
-                    'cursos': cursos
-                })
-
-        # Manejo del curso
-        if not curso_id:
-            return render(request, 'demo/registro.html', {
-                'mensaje': "Selecciona un curso.",
-                'colegios': colegios,
-                'cursos': cursos
-            })
+        if not nombre or not email or not password or not colegio_id or not curso_id:
+            messages.error(request, "Todos los campos son obligatorios.")
+            return render(request, 'demo/registro.html', {'colegios': colegios})
 
         try:
+            # Crear usuario
+            user = User.objects.create_user(username=nombre, email=email, password=password)
+
+            # Asociar curso y alumnos
             curso = Curso.objects.get(id=curso_id)
-        except Curso.DoesNotExist:
-            return render(request, 'demo/registro.html', {
-                'mensaje': "El curso seleccionado no existe.",
-                'colegios': colegios,
-                'cursos': cursos
-            })
+            for i in range(1, 5):
+                alumno_nombre = request.POST.get(f"alumno_{i}")
+                if alumno_nombre:
+                    Alumno.objects.create(nombre=alumno_nombre, curso=curso, apoderado=user)
 
-        # Crear usuario
-        user = User.objects.create_user(username=nombre, email=email, password=password)
+            messages.success(request, "Registro completado con éxito.")
+            return redirect('registro')
 
-        # Crear alumnos
-        for alumno_nombre in alumnos:
-            Alumno.objects.create(nombre=alumno_nombre, curso=curso, apoderado=user)
+        except Exception as e:
+            messages.error(request, f"Error durante el registro: {e}")
 
-        return render(request, 'demo/registro.html', {
-            'mensaje': f"Usuario {nombre} registrado con éxito. Pupilos registrados: {len(alumnos)}.",
-            'colegios': colegios,
-            'cursos': cursos
-        })
+    return render(request, 'demo/registro.html', {'colegios': colegios})
 
-    return render(request, 'demo/registro.html', {'colegios': colegios, 'cursos': cursos})
-
-
-
-
-
-from django.http import JsonResponse
-from .models import Curso
 
 def get_cursos(request, colegio_id):
-    cursos = Curso.objects.filter(colegio_id=colegio_id)
-    cursos_data = [{"id": curso.id, "nombre": curso.nombre} for curso in cursos]
-    return JsonResponse({"cursos": cursos_data})
-
-
+    try:
+        cursos = Curso.objects.filter(colegio_id=colegio_id)
+        cursos_data = [{"id": curso.id, "nombre": curso.nombre} for curso in cursos]
+        return JsonResponse({"cursos": cursos_data})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
 
 
 
