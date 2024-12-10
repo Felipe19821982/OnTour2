@@ -42,107 +42,35 @@
     <main class="products container">
         <div class="box-container" id="lista-1">
             <div class="box" >
-                <img src="{% static 'imagenbanda/kendrickl.jpeg' %}" alt="">
+                <img src="{% static 'img/Monte_Tarn_6.jpg' %}" alt="">
                 <div class="product-txt">
-                    <h3>Kendrick Lamar</h3>
-                    <p>Formato en vinilo</p>
-                    <p class="precio">43000</p>
+                    <h3>Caminata a Monte Tarn</h3>
+                    <p>Nivel de exigencia Medio-Alto</p>
+                    <p class="precio">180000</p>
                     <a href="#" class="agregar-carrito btn-3" data-id="2">Agregar al carrito</a>
                 </div>
             </div>
             <div class="box">
-                <img src="{% static 'imagenbanda/chancho.jpeg' %}" alt="">
+                <img src="{% static 'img/Reserva_Laguna_Parrillar_3.jpg' %}" alt="">
                 <div class="product-txt">
-                    <h3>Chancho en Piedra</h3>
-                    <p>Formato en Vinilo</p>
-                    <p class="precio">53000</p>
+                    <h3>Caminata a Laguna Parrillar</h3>
+                    <p>Nivel de exigencia Bajo</p>
+                    <p class="precio">120000</p>
                     <a href="#" class="agregar-carrito btn-3" data-id="2">Agregar al carrito</a>
                 </div>
             </div>
             <div class="box">
-                <img src="{% static 'imagenbanda/specials.jpg' %}" alt="">
+                <img src="{% static 'img/Mirador_Zapador_Austral2.jpg' %}" alt="">
                 <div class="product-txt">
-                    <h3>The Specials</h3>
-                    <p>Formato en CD</p>
-                    <p class="precio">33000</p>
+                    <h3>Caminata a Mirador Zapador Austral</h3>
+                    <p>Nivel de exigencia Medio</p>
+                    <p class="precio">160000</p>
                     <a href="#" class="agregar-carrito btn-3" data-id="1">Agregar al carrito</a>
-                </div>
-            </div>
-            <div class="box">
-                <img src="{% static 'imagenbanda/bloquedepre.png' %}" alt="">
-                <div class="product-txt">
-                    <h3>Bloque Depresivo</h3>
-                    <p>Formato en Cassete</p>
-                    <p class="precio">77000</p>
-                    <a href="#" class="agregar-carrito btn-3" data-id="2">Agregar al carrito</a>
-                </div>
-            </div>
-            <div class="box" style="display: none;">
-                <img src="{% static 'imagenbanda/bowie.png' %}" alt="">
-                <div class="product-txt">
-                    <h3>David Bowie</h3>
-                    <p>Formato en Cassette</p>
-                    <p class="precio">22000</p>
-                    <a href="#" class="agregar-carrito btn-3" data-id="3">Agregar al carrito</a>
-                </div>
-            </div>
-            <div class="box">
-                <img src="{% static 'imagenbanda/tool1.jpeg' %}" alt="">
-                <div class="product-txt">
-                    <h3>Tool</h3>
-                    <p>Formato en Cassette</p>
-                    <p class="precio">30000</p>
-                    <a href="#" class="agregar-carrito btn-3" data-id="1">Agregar al carrito</a>
-                </div>
-            </div>
-            <div class="box">
-                <img src="{% static 'imagenbanda/flori.jpeg' %}" alt="">
-                <div class="product-txt">
-                    <h3>La Floripondio</h3>
-                    <p>Formato en CD</p>
-                    <p class="precio">13000</p>
-                    <a href="#" class="agregar-carrito btn-3" data-id="2">Agregar al carrito</a>
-                </div>
-            </div>
-            <div class="box">
-                <img src="{% static 'imagenbanda/artic.jpeg' %}" alt="">
-                <div class="product-txt">
-                    <h3>Arctic Monkeys</h3>
-                    <p>Formato en Cassette</p>
-                    <p class="precio">18000</p>
-                    <a href="#" class="agregar-carrito btn-3" data-id="3">Agregar al carrito</a>
-                </div>
-            </div>
-            <div class="box">
-                <img src="{% static 'imagenbanda/post.jpeg' %}" alt="">
-                <div class="product-txt">
-                    <h3>Post Malone</h3>
-                    <p>Formato en Cassette</p>
-                    <p class="precio">15000</p>
-                    <a href="#" class="agregar-carrito btn-3" data-id="3">Agregar al carrito</a>
-                </div>
-            </div>
-            <div class="box">
-                <img src="{% static 'imagenbanda/metallica.jpeg' %}" alt="">
-                <div class="product-txt">
-                    <h3>Metallica</h3>
-                    <p>Calidad premium</p>
-                    <p class="precio">45000</p>
-                    <a href="#" class="agregar-carrito btn-3" data-id="1">Agregar al carrito</a>
-                </div>
-            </div>
-            <div class="box">
-                <img src="{% static 'imagenbanda/theb.jpeg' %}" alt="">
-                <div class="product-txt">
-                    <h3>The Beatles</h3>
-                    <p>Formato en Vinilo</p>
-                    <p class="precio">58000</p>
-                    <a href="#" class="agregar-carrito btn-3" data-id="3">Agregar al carrito</a>
                 </div>
             </div>
         </div>
         <!-- Botón para cargar más productos -->
-        <div class="btn-2" id="load-more">Cargar Más</div>
+        {% comment %} <div class="btn-2" id="load-more">Cargar Más</div> {% endcomment %}
         <br>
     </main>
 
