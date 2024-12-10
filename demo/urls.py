@@ -44,6 +44,13 @@ urlpatterns = [
 
 
     path('get-cursos/<int:colegio_id>/', views.get_cursos, name='get-cursos'),
+
+    path('panel/apoderados/seguros/', views.listar_seguros, name='listar_seguros'),
+    path('panel/administradores/agregar_seguro/', views.agregar_seguro, name='agregar_seguro'),
+    
 ]
 
+from django.conf import settings
+from django.conf.urls.static import static
 
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

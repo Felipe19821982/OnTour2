@@ -447,3 +447,71 @@ def seguros_contratados(request):
     seguros = Seguro.objects.filter(apoderado=request.user)
     context = {'seguros': seguros}
     return render(request, 'panel/apoderados/seguros.html', context)
+
+
+
+
+
+
+
+
+@login_required
+def estado_cuenta(request):
+    # Obtener depósitos del usuario
+    depositos = Deposito.objects.filter(apoderado=request.user)
+    total_apoderado = sum([deposito.monto for deposito in depositos])
+
+    # Calcular el total colectivo para los cursos del usuario
+    cursos = {deposito.curso for deposito in depositos}
+    total_colectivo = sum([curso.fondo.total_colectivo for curso in cursos])
+
+    # Definir metas
+    meta_curso = 11250000
+    meta_individual = 450000
+
+    # Calcular saldos
+    saldo_curso = meta_curso - total_colectivo
+    saldo_individual = meta_individual - total_apoderado
+
+    context = {
+        'depositos': depositos,
+        'total_apoderado': total_apoderado,
+        'total_colectivo': total_colectivo,
+        'meta_curso': meta_curso,
+        'meta_individual': meta_individual,
+        'saldo_curso': saldo_curso,
+        'saldo_individual': saldo_individual,
+    }
+    return render(request, 'panel/apoderados/estado_cuenta.html', context)
+
+
+
+
+
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required, user_passes_test
+from .models import Seguro
+from .forms import SeguroForm
+
+# Verificar si el usuario es administrador
+def is_admin(user):
+    return user.is_superuser
+
+@login_required
+def listar_seguros(request):
+    seguros = Seguro.objects.all()
+    return render(request, 'panel/apoderados/seguros.html', {'seguros': seguros})
+
+@user_passes_test(is_admin)
+@login_required
+def agregar_seguro(request):
+    if request.method == 'POST':
+        form = SeguroForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('listar_seguros')
+    else:
+        form = SeguroForm()
+    return render(request, 'panel/administradores/agregar_seguro.html', {'form': form})

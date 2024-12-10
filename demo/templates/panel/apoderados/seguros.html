@@ -1,16 +1,32 @@
 {% extends "demo/base.html" %}
 {% block content %}
-<h2>Seguros Contratados</h2>
-<table>
-    <tr>
-        <th>Tipo</th>
-        <th>Fecha Contratado</th>
-    </tr>
-    {% for seguro in seguros %}
-    <tr>
-        <td>{{ seguro.tipo }}</td>
-        <td>{{ seguro.fecha_contratado }}</td>
-    </tr>
-    {% endfor %}
-</table>
+<div class="container mt-5">
+    <h2 class="text-center mb-4 text-dark">Lista de Seguros</h2>
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>#</th>
+                <th>Tipo</th>
+                <th>Fecha</th>
+                <th>Archivo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for seguro in seguros %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ seguro.tipo }}</td>
+                <td>{{ seguro.fecha_contratado|date:"d-m-Y H:i" }}</td>
+                <td>
+                    {% if seguro.archivo %}
+                    <a href="{{ seguro.archivo.url }}" target="_blank">Ver Archivo</a>
+                    {% else %}
+                    No disponible
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

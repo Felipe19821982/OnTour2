@@ -95,10 +95,15 @@ class Deposito(models.Model):
     def __str__(self):
         return f"Depósito de {self.monto} por {self.apoderado.username} ({self.fecha})"
 
+from django.db import models
+from django.contrib.auth.models import User
+
 class Seguro(models.Model):
     apoderado = models.ForeignKey(User, on_delete=models.CASCADE, related_name="seguros")
     tipo = models.CharField(max_length=100)
     fecha_contratado = models.DateTimeField(auto_now_add=True)
+    archivo = models.FileField(upload_to='seguros/', null=True, blank=True)  # Para almacenar el PDF
 
     def __str__(self):
         return f"Seguro {self.tipo} contratado por {self.apoderado.username}"
+

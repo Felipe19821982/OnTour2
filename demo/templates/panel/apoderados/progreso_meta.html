@@ -1,6 +1,67 @@
 {% extends "demo/base.html" %}
 {% block content %}
-<h2>Progreso Financiero</h2>
-<p><strong>Progreso Individual:</strong> {{ total_apoderado }}</p>
-<p><strong>Progreso Colectivo:</strong> {{ total_colectivo }}</p>
+<div class="container mt-5">
+    <h2 class="text-center mb-4 text-dark">Progreso de la Meta Colectiva</h2>
+
+    <!-- Resumen General -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body text-dark">
+            <h4 class="text-primary">Resumen General</h4>
+            <p><strong>Meta del Curso:</strong> ${{ meta_curso }}</p>
+            <p><strong>Total Recaudado:</strong> ${{ total_colectivo }}</p>
+            <p><strong>Saldo Restante:</strong> ${{ saldo_curso }}</p>
+        </div>
+    </div>
+
+    <!-- Gráfico de Progreso -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Gráfico de Progreso</h5>
+        </div>
+        <div class="card-body">
+            <canvas id="progresoMetaChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Script de Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('progresoMetaChart').getContext('2d');
+        
+        // Datos para el gráfico
+        const totalColectivo = {{ total_colectivo }};
+        const metaCurso = {{ meta_curso }};
+        const saldoRestante = metaCurso - totalColectivo;
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Recaudado', 'Restante'],
+                datasets: [{
+                    data: [totalColectivo, saldoRestante],
+                    backgroundColor: ['#4caf50', '#f44336'], // Colores
+                    borderColor: ['#ffffff', '#ffffff'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': $' + context.raw.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
 {% endblock %}
