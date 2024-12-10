@@ -1,11 +1,114 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    
-</body>
-</html>
+{% extends "demo/base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Depósitos Colectivos</h2>
+
+    <!-- Alerta de éxito o error -->
+    {% if mensaje %}
+    <div class="alert alert-{{ mensaje.tipo }} text-center" role="alert">
+        {{ mensaje.texto }}
+    </div>
+    {% endif %}
+
+        <!-- Mensajes de retroalimentación -->
+        {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+    <!-- Formulario de Depósito Colectivo -->
+    <form method="post" class="shadow p-4 rounded bg-light">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="colegio" class="font-weight-bold">Colegio</label>
+            <select class="form-control" id="colegio" name="colegio" onchange="cargarCursos()" required>
+                <option value="" disabled selected>-- Seleccione un Colegio --</option>
+                {% for colegio in colegios %}
+                <option value="{{ colegio.id }}">{{ colegio.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="curso" class="font-weight-bold">Curso</label>
+            <select class="form-control" id="curso" name="curso" required>
+                <option value="" disabled selected>-- Seleccione un Curso --</option>
+                <!-- Opciones de cursos se cargarán dinámicamente -->
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="monto" class="font-weight-bold">Monto Total a Depositar</label>
+            <input type="number" step="0.01" class="form-control" id="monto" name="monto" placeholder="Ingrese el monto total" required>
+        </div>
+        <div class="form-group">
+            <label for="descripcion" class="font-weight-bold">Descripción del Depósito</label>
+            <textarea class="form-control" id="descripcion" name="descripcion" rows="3" placeholder="Detalles adicionales sobre el depósito"></textarea>
+        </div>
+        <div class="form-group text-center">
+            <button type="submit" class="btn btn-primary btn-lg">Registrar Depósito</button>
+        </div>
+    </form>
+
+    <!-- Tabla de Depósitos Colectivos -->
+    <div class="mt-5">
+        <h3 class="text-center mb-4">Historial de Depósitos Colectivos</h3>
+        <table class="table table-striped table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Fecha</th>
+                    <th scope="col">Colegio</th>
+                    <th scope="col">Curso</th>
+                    <th scope="col">Monto</th>
+                    <th scope="col">Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for deposito in depositos %}
+                <tr>
+                    <td>{{ deposito.fecha|date:"d-m-Y" }}</td>
+                    <td>{{ deposito.curso.colegio.nombre }}</td>
+                    <td>{{ deposito.curso.nombre }}</td>
+                    <td>${{ deposito.monto|floatformat:2 }}</td>
+                    <td>{{ deposito.descripcion }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">No hay depósitos registrados.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- JavaScript para cargar cursos dinámicamente -->
+<script>
+    function cargarCursos() {
+        const colegioId = document.getElementById('colegio').value;
+        const cursoSelect = document.getElementById('curso');
+
+        // Limpiar el dropdown de cursos
+        cursoSelect.innerHTML = '<option value="" disabled selected>-- Seleccione un Curso --</option>';
+
+        if (colegioId) {
+            fetch(`/get-cursos/${colegioId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    data.cursos.forEach(curso => {
+                        const option = document.createElement('option');
+                        option.value = curso.id;
+                        option.textContent = curso.nombre;
+                        cursoSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error al cargar los cursos:', error);
+                });
+        }
+    }
+</script>
+{% endblock %}

@@ -542,3 +542,48 @@ def comunicacion_ejecutivo(request):
     # Obtener historial de mensajes
     mensajes = Mensaje.objects.filter(usuario=request.user).order_by('-fecha')
     return render(request, 'panel/curso/comunicacion.html', {'mensajes': mensajes})
+
+
+
+from django.contrib import messages
+
+@login_required
+def deposito_colectivo(request):
+    if request.method == "POST":
+        colegio_id = request.POST.get("colegio")
+        curso_id = request.POST.get("curso")
+        monto = request.POST.get("monto")
+        descripcion = request.POST.get("descripcion")
+
+        try:
+            curso = Curso.objects.get(id=curso_id, colegio_id=colegio_id)
+            Deposito.objects.create(curso=curso, monto=monto, descripcion=descripcion or "")
+            messages.success(request, "Depósito registrado exitosamente.")
+        except Curso.DoesNotExist:
+            messages.error(request, "El curso seleccionado no existe.")
+        except Exception as e:
+            messages.error(request, f"Error al registrar el depósito: {str(e)}")
+        return redirect('deposito_colectivo')
+
+    colegios = Colegio.objects.all()
+    depositos = Deposito.objects.filter(curso__isnull=False).order_by('-fecha')
+    return render(request, 'panel/curso/deposito_colectivo.html', {
+        'colegios': colegios,
+        'depositos': depositos
+    })
+
+
+
+from django.shortcuts import render
+
+def reporte_financiero(request):
+    total_recaudado = 7500000  # Ejemplo, ajusta según los datos reales
+    meta_curso = 11250000
+    saldo_pendiente = meta_curso - total_recaudado
+
+    context = {
+        'total_recaudado': total_recaudado,
+        'meta_curso': meta_curso,
+        'saldo_pendiente': saldo_pendiente,
+    }
+    return render(request, 'panel/curso/reporte_financiero.html', context)

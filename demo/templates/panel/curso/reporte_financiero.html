@@ -1,11 +1,59 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    
-</body>
-</html>
+{% extends "demo/base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4 text-primary">Reporte Financiero</h2>
+
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Resumen Financiero del Curso</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>Total Recaudado:</strong> ${{ total_recaudado|floatformat:0 }}</p>
+            <p><strong>Meta del Curso:</strong> ${{ meta_curso|floatformat:0 }}</p>
+            <p><strong>Saldo Pendiente:</strong> ${{ saldo_pendiente|floatformat:0 }}</p>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Progreso Financiero</h5>
+        </div>
+        <div class="card-body">
+            <canvas id="financialChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('financialChart').getContext('2d');
+    const financialChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Total Recaudado', 'Saldo Pendiente'],
+            datasets: [{
+                data: [{{ total_recaudado }}, {{ saldo_pendiente }}],
+                backgroundColor: ['#007bff', '#e4e4e4']
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

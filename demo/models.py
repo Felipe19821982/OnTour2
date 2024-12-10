@@ -121,3 +121,9 @@ class Mensaje(models.Model):
     def __str__(self):
         return f"{self.asunto} - {self.usuario.username}"
 
+class Deposito(models.Model):
+    apoderado = models.ForeignKey(User, on_delete=models.CASCADE, related_name="depositos")
+    monto = models.DecimalField(max_digits=10, decimal_places=2)
+    fecha = models.DateTimeField(auto_now_add=True)
+    curso = models.ForeignKey(Curso, on_delete=models.CASCADE, related_name="depositos")
+    descripcion = models.TextField(blank=True, null=True)  # Agregar este campo si no está
