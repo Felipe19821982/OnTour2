@@ -55,3 +55,48 @@ body{
         font-size: 1.2em;
     }
 }
+
+
+#footer {
+    background-color: #343a40; /* Fondo oscuro */
+    color: #ffffff; /* Texto blanco */
+    font-size: 0.9rem;
+    padding: 10px 0;
+    border-top: 1px solid #e4e4e4; /* Línea delgada arriba */
+}
+#footer .social-media h3 {
+    margin: 0;
+    padding-right: 20px;
+}
+#footer .icons {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+#footer .icons li {
+    margin: 0 10px;
+}
+#footer .icons li a {
+    color: #ffffff;
+    text-decoration: none;
+}
+#footer .copyright {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 0.8rem;
+}
+#footer .copyright .menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+#footer .copyright .menu li {
+    display: inline;
+    margin-right: 10px;
+}
+#footer .copyright .menu li a {
+    color: #ffffff;
+    text-decoration: none;
+}
