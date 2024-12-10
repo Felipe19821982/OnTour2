@@ -515,3 +515,30 @@ def agregar_seguro(request):
     else:
         form = SeguroForm()
     return render(request, 'panel/administradores/agregar_seguro.html', {'form': form})
+
+
+
+
+
+from django.shortcuts import render, redirect
+from .models import Mensaje  # Modelo para almacenar mensajes
+from django.utils.timezone import now
+
+@login_required
+def comunicacion_ejecutivo(request):
+    if request.method == "POST":
+        asunto = request.POST.get("asunto")
+        contenido = request.POST.get("mensaje")
+        
+        # Guardar mensaje en la base de datos
+        Mensaje.objects.create(
+            asunto=asunto,
+            contenido=contenido,
+            usuario=request.user,
+            fecha=now()
+        )
+        return redirect('comunicacion_ejecutivo')
+    
+    # Obtener historial de mensajes
+    mensajes = Mensaje.objects.filter(usuario=request.user).order_by('-fecha')
+    return render(request, 'panel/curso/comunicacion.html', {'mensajes': mensajes})
