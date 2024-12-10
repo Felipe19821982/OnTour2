@@ -33,15 +33,15 @@
 							<li>
 								<a href="#">Productos</a>
 								<ul>
-									<li><a href="{% url 'vinilo'%}">Vinilos</a></li>
-									<li><a href="{% url 'cd'%}">CD</a></li>
-									<li><a href="{% url 'cassette'%}">Cassette</a></li>
+									<li><a href="{% url 'vinilo'%}">Tour 1</a></li>
+									<li><a href="{% url 'cd'%}">Tour 2</a></li>
+									<li><a href="{% url 'cassette'%}">Tour 3</a></li>
 									<li><a href="{% url 'comprar'%}">Todo</a></li>
 								</ul>
 							</li>
 							<li {%if clase == 'trabaja'%} class="current" {%endif%}><a href="{% url 'trabaja'%}">Trabaja Aquí</a></li>
 							<li {%if clase == 'contactanos'%} class="current" {%endif%}><a href="{% url 'contactanos'%}">Contactanos</a></li>
-							<li {%if clase == 'galeria'%} class="current" {%endif%}><a href="{% url 'galeria'%}">Galeria</a></li>
+							<li {%if clase == 'galeria'%} class="current" {%endif%}><a href="{% url 'galeria'%}">Postulantes</a></li>
 							
 							{% if user.is_authenticated %}
 								<li>
