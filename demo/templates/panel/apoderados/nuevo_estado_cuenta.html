@@ -1,0 +1,63 @@
+{% extends "demo/base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4 text-dark">Estado de Cuenta</h2>
+
+    <!-- Selección de Alumno -->
+    <form method="get" class="mb-4">
+        <label for="alumno_id" class="font-weight-bold">Selecciona un Alumno:</label>
+        <select name="alumno_id" id="alumno_id" class="form-control w-50 d-inline-block">
+            <option value="">Todos</option>
+            {% for alumno in alumnos %}
+                <option value="{{ alumno.id }}" 
+                    {% if alumno_seleccionado and alumno.id == alumno_seleccionado.id %}selected{% endif %}>
+                    {{ alumno.nombre }} - {{ alumno.curso.nombre }}
+                </option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+    </form>
+
+    <!-- Resumen -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4>Total Recaudado: ${{ total_apoderado }}</h4>
+            <h4>Saldo Pendiente: ${{ saldo_individual }}</h4>
+            <div class="progress">
+                <div class="progress-bar bg-success" role="progressbar" style="width: {{ progreso_individual }}%;">
+                    {{ progreso_individual }}%
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detalles de los Depósitos -->
+    <div class="card">
+        <div class="card-header bg-primary text-white">Detalles de los Depósitos</div>
+        <div class="card-body">
+            {% if depositos %}
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Curso</th>
+                        <th>Monto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for deposito in depositos %}
+                    <tr>
+                        <td>{{ deposito.fecha|date:"d/m/Y" }}</td>
+                        <td>{{ deposito.curso.nombre }}</td>
+                        <td>${{ deposito.monto }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No se han registrado depósitos aún.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

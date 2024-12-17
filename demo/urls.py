@@ -5,7 +5,7 @@ from . import views
 urlpatterns = [
     path('', views.index, name='index'),
     path('galeria', views.galeria, name='galeria'),
-    path('registro', views.registro, name='registro'),
+    
     path('perfil', views.perfil, name='perfil'),
     path('vinilo', views.vinilo, name='vinilo'),
     path('contactanos', views.contactanos, name='contactanos'),
@@ -42,12 +42,20 @@ urlpatterns = [
     path('panel/ejecutivos/seguimiento_depositos/', views.seguimiento_depositos, name='seguimiento_depositos'),
     path('panel/ejecutivos/informacion_seguros/', views.informacion_seguros, name='informacion_seguros'),
 
-
+    path('registro', views.registro, name='registro'),
     path('get-cursos/<int:colegio_id>/', views.get_cursos, name='get-cursos'),
+    
 
     path('panel/apoderados/seguros/', views.listar_seguros, name='listar_seguros'),
     path('panel/administradores/agregar_seguro/', views.agregar_seguro, name='agregar_seguro'),
-    
+    path('panel/apoderados/deposito_individual/', views.registrar_deposito, name='registrar_deposito'),
+
+
+    path('nuevo_registrar_deposito/', views.nuevo_registrar_deposito, name='nuevo_registrar_deposito'),
+    path('panel/apoderados/estado_cuenta/', views.estado_cuenta, name='estado_cuenta_apoderado'),
+
+    path('panel/apoderados/estado_cuenta/', views.nuevo_estado_cuenta, name='estado_cuenta'),
+
 ]
 
 from django.conf import settings

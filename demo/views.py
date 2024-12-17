@@ -252,12 +252,12 @@ def alumnosUpdate(request):
 @login_required
 def estado_cuenta_apoderado(request):
     context = {"clase": "estado_cuenta_apoderado"}
-    return render(request, 'panel/apoderados/estado_cuenta.html', context)
+    return render(request, 'panel/apoderados/nuevo_estado_cuenta.html', context)
 
 @login_required
 def deposito_individual(request):
     context = {"clase": "deposito_individual"}
-    return render(request, 'panel/apoderados/deposito_individual.html', context)
+    return render(request, 'panel/apoderados/nuevo_registrar_deposito.html', context)
 
 @login_required
 def seguros_apoderado(request):
@@ -303,9 +303,10 @@ def informacion_seguros(request):
 
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from .models import Colegio, Curso, Alumno
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.db import transaction
+from .models import Colegio, Curso, Alumno
 
 def registro(request):
     colegios = Colegio.objects.all()
@@ -317,25 +318,35 @@ def registro(request):
         colegio_id = request.POST.get("colegio")
         curso_id = request.POST.get("curso")
 
-        # Validaciones
+        # Validación de campos obligatorios
         if not nombre or not email or not password or not colegio_id or not curso_id:
             messages.error(request, "Todos los campos son obligatorios.")
             return render(request, 'demo/registro.html', {'colegios': colegios})
 
         try:
-            # Crear usuario
-            user = User.objects.create_user(username=nombre, email=email, password=password)
+            # Usar transacción para garantizar atomicidad
+            with transaction.atomic():
+                # Crear el usuario (apoderado)
+                user = User.objects.create_user(username=nombre, email=email, password=password)
+                
+                # Validar la existencia del curso y colegio
+                curso = Curso.objects.get(id=curso_id, colegio_id=colegio_id)
 
-            # Asociar curso y alumnos
-            curso = Curso.objects.get(id=curso_id)
-            for i in range(1, 5):
-                alumno_nombre = request.POST.get(f"alumno_{i}")
-                if alumno_nombre:
-                    Alumno.objects.create(nombre=alumno_nombre, curso=curso, apoderado=user)
+                # Guardar hasta 4 alumnos
+                for i in range(1, 5):
+                    alumno_nombre = request.POST.get(f"alumno_{i}")
+                    if alumno_nombre:
+                        # Evitar duplicados en el mismo curso para el mismo apoderado
+                        if Alumno.objects.filter(nombre=alumno_nombre, curso=curso, apoderado=user).exists():
+                            messages.warning(request, f"El alumno '{alumno_nombre}' ya está registrado en este curso.")
+                            continue
+                        Alumno.objects.create(nombre=alumno_nombre, curso=curso, apoderado=user)
 
-            messages.success(request, "Registro completado con éxito.")
-            return redirect('registro')
+                messages.success(request, "Registro completado con éxito.")
+                return redirect('registro')
 
+        except Curso.DoesNotExist:
+            messages.error(request, "El curso seleccionado no existe para el colegio proporcionado.")
         except Exception as e:
             messages.error(request, f"Error durante el registro: {e}")
 
@@ -351,81 +362,63 @@ def get_cursos(request, colegio_id):
         return JsonResponse({"error": str(e)}, status=400)
 
 
-
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from .models import Deposito, Fondo
-
 @login_required
 def estado_cuenta(request):
-    # Obtener depósitos del usuario
-    depositos = Deposito.objects.filter(apoderado=request.user)
+    # Obtener los alumnos del apoderado autenticado
+    alumnos = Alumno.objects.filter(apoderado=request.user)
+
+    # Filtrar por alumno específico
+    alumno_id = request.GET.get('alumno_id')
+    if alumno_id:
+        depositos = Deposito.objects.filter(apoderado=request.user, curso__alumnos__id=alumno_id)
+        alumno_seleccionado = Alumno.objects.get(id=alumno_id)
+    else:
+        depositos = Deposito.objects.filter(apoderado=request.user)
+        alumno_seleccionado = None
+
+    # Depuración: Imprime los depósitos en consola
+    print("Depositos recuperados:", depositos)
+
+    # Cálculo de metas
+    meta_individual = 550000  # Meta individual por alumno
+    meta_curso = 13750000  # Meta total del curso
+
     total_apoderado = sum([deposito.monto for deposito in depositos])
+    saldo_individual = meta_individual - total_apoderado
 
-    # Calcular el total colectivo para los cursos del usuario
-    cursos = {deposito.curso for deposito in depositos}
+    # Calcular el progreso individual (en porcentaje)
+    progreso_individual = (total_apoderado / meta_individual) * 100 if meta_individual > 0 else 0
+
+    # Calcular el progreso colectivo del curso
+    cursos = set(deposito.curso for deposito in depositos)
     total_colectivo = sum([curso.fondo.total_colectivo for curso in cursos])
+    saldo_curso = meta_curso - total_colectivo
 
+    # Enviar al contexto
     context = {
+        'alumnos': alumnos,
         'depositos': depositos,
         'total_apoderado': total_apoderado,
-        'total_colectivo': total_colectivo
+        'saldo_individual': saldo_individual,
+        'meta_individual': meta_individual,
+        'total_colectivo': total_colectivo,
+        'saldo_curso': saldo_curso,
+        'meta_curso': meta_curso,
+        'progreso_individual': round(progreso_individual, 2),  # Progreso redondeado
+        'alumno_seleccionado': alumno_seleccionado,
     }
     return render(request, 'panel/apoderados/estado_cuenta.html', context)
 
 
 
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+
 from django.shortcuts import render, redirect
-from .models import Deposito, Fondo, Curso
-
-@login_required
-def registrar_deposito(request):
-    # Obtener los alumnos asociados al apoderado
-    alumnos = request.user.alumnos.all()
-
-    if not alumnos.exists():
-        return render(request, 'panel/apoderados/deposito_individual.html', {'mensaje': 'No tienes alumnos registrados.'})
-
-    if request.method == "POST":
-        alumno_id = request.POST.get("alumno")
-        monto = request.POST.get("monto")
-
-        # Validar que el alumno seleccionado pertenece al apoderado
-        try:
-            alumno = alumnos.get(id=alumno_id)
-        except Alumno.DoesNotExist:
-            return render(request, 'panel/apoderados/deposito_individual.html', {
-                'alumnos': alumnos,
-                'mensaje': 'El alumno seleccionado no es válido.'
-            })
-
-        # Validar que el monto sea un número válido
-        try:
-            monto = float(monto)
-        except ValueError:
-            return render(request, 'panel/apoderados/deposito_individual.html', {
-                'alumnos': alumnos,
-                'mensaje': 'Por favor, ingresa un monto válido.'
-            })
-
-        # Obtener el curso del alumno y su fondo colectivo
-        curso = alumno.curso
-        fondo, created = Fondo.objects.get_or_create(curso=curso)
-
-        # Crear el depósito
-        Deposito.objects.create(apoderado=request.user, monto=monto, curso=curso)
-
-        # Actualizar el fondo colectivo
-        fondo.total_colectivo += monto
-        fondo.save()
-
-        # Redirigir con mensaje de éxito
-        return redirect('estado_cuenta')
-
-    # Renderizar el formulario con la lista de alumnos
-    return render(request, 'panel/apoderados/deposito_individual.html', {'alumnos': alumnos})
-
-
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import Deposito, Alumno
 
 @login_required
 def progreso_financiero(request):
@@ -455,34 +448,44 @@ def seguros_contratados(request):
 
 
 
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Alumno, Deposito
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Alumno, Deposito
+
 @login_required
 def estado_cuenta(request):
-    # Obtener depósitos del usuario
-    depositos = Deposito.objects.filter(apoderado=request.user)
-    total_apoderado = sum([deposito.monto for deposito in depositos])
+    usuario = request.user  # Usuario autenticado
+    alumnos = Alumno.objects.filter(apoderado=usuario)
 
-    # Calcular el total colectivo para los cursos del usuario
-    cursos = {deposito.curso for deposito in depositos}
-    total_colectivo = sum([curso.fondo.total_colectivo for curso in cursos])
+    # Filtrar depósitos por alumno si se selecciona
+    alumno_id = request.GET.get("alumno_id")
+    if alumno_id:
+        alumno_seleccionado = alumnos.filter(id=alumno_id).first()
+        depositos = Deposito.objects.filter(apoderado=usuario, curso=alumno_seleccionado.curso)
+    else:
+        alumno_seleccionado = None
+        depositos = Deposito.objects.filter(apoderado=usuario)
 
-    # Definir metas
-    meta_curso = 11250000
-    meta_individual = 450000
-
-    # Calcular saldos
-    saldo_curso = meta_curso - total_colectivo
+    meta_individual = 550000
+    total_apoderado = sum(deposito.monto for deposito in depositos)
     saldo_individual = meta_individual - total_apoderado
+    progreso_individual = (total_apoderado / meta_individual) * 100 if meta_individual > 0 else 0
 
     context = {
+        'alumnos': alumnos,
         'depositos': depositos,
+        'alumno_seleccionado': alumno_seleccionado,
         'total_apoderado': total_apoderado,
-        'total_colectivo': total_colectivo,
-        'meta_curso': meta_curso,
-        'meta_individual': meta_individual,
-        'saldo_curso': saldo_curso,
         'saldo_individual': saldo_individual,
+        'progreso_individual': round(progreso_individual, 2),
+        'meta_individual': meta_individual,
     }
-    return render(request, 'panel/apoderados/estado_cuenta.html', context)
+    return render(request, 'panel/apoderados/nuevo_estado_cuenta.html', context)
+
 
 
 
@@ -587,3 +590,105 @@ def reporte_financiero(request):
         'saldo_pendiente': saldo_pendiente,
     }
     return render(request, 'panel/curso/reporte_financiero.html', context)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import Alumno
+
+@login_required
+def nuevo_registrar_deposito(request):
+    # Nueva variable: mis_pupilos
+    mis_pupilos = Alumno.objects.filter(apoderado=request.user)
+
+    # Depuración en consola
+    print("Usuario autenticado:", request.user.username)
+    print("Mis Pupilos:", mis_pupilos)
+
+    if request.method == "POST":
+        pupilo_id = request.POST.get("pupilo_id")
+        monto = request.POST.get("monto")
+
+        try:
+            pupilo = mis_pupilos.get(id=pupilo_id)
+        except Alumno.DoesNotExist:
+            messages.error(request, "El pupilo seleccionado no es válido.")
+            return redirect('nuevo_registrar_deposito')
+
+        messages.success(request, f"Depósito registrado para {pupilo.nombre}.")
+        return redirect('nuevo_registrar_deposito')
+
+    return render(request, 'panel/apoderados/nuevo_registrar_deposito.html', {
+        'mis_pupilos': mis_pupilos
+    })
+
+
+
+
+@login_required
+def registrar_deposito(request):
+    alumnos = Alumno.objects.filter(apoderado=request.user)
+
+    if request.method == "POST":
+        alumno_id = request.POST.get("alumno")
+        monto = request.POST.get("monto")
+        
+        print("POST recibido:", request.POST)
+
+        try:
+            alumno = alumnos.get(id=alumno_id)
+            print("Alumno encontrado:", alumno)
+
+            # Crear el depósito
+            deposito = Deposito.objects.create(
+                apoderado=request.user,
+                monto=float(monto),
+                curso=alumno.curso,
+                descripcion=f"Depósito registrado para {alumno.nombre}"
+            )
+
+            print("Depósito creado exitosamente:", deposito)
+            return redirect('estado_cuenta_apoderado')
+
+        except Alumno.DoesNotExist:
+            print("Error: Alumno no existe")
+        except Exception as e:
+            print("Error al crear el depósito:", str(e))
+
+    return render(request, 'panel/apoderados/deposito_individual.html', {'alumnos': alumnos})
+
+
+
+@login_required
+def nuevo_estado_cuenta(request):
+    # Depuración: Confirmar usuario autenticado
+    print("Usuario autenticado:", request.user)
+    print("ID del usuario:", request.user.id)
+
+    # Obtener los alumnos asociados al usuario autenticado
+    mis_alumnos = Alumno.objects.filter(apoderado=request.user)
+
+    print("Alumnos encontrados:", mis_alumnos)  # Depuración de alumnos
+
+    context = {
+        'mis_alumnos': mis_alumnos,
+    }
+
+    return render(request, 'panel/apoderados/nuevo_estado_cuenta.html', context)
+
+

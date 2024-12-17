@@ -1,0 +1,48 @@
+{% extends "demo/base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4 text-dark">Registrar Nuevo Depósito</h2>
+
+    <!-- Mostrar mensajes de éxito o error -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Mostrar la lista de pupilos -->
+    <h5 class="text-primary">Lista de Mis Pupilos</h5>
+    {% if mis_pupilos %}
+        <ul>
+            {% for pupilo in mis_pupilos %}
+                <li>{{ pupilo.nombre }} - {{ pupilo.curso.nombre }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No tienes pupilos registrados.</p>
+    {% endif %}
+
+    <!-- Formulario para registrar el depósito -->
+    <form method="post" class="shadow p-4 bg-light rounded">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="pupilo_id" class="font-weight-bold text-dark">Selecciona el Pupilo</label>
+            <select class="form-control" id="pupilo_id" name="pupilo_id" required>
+                <option value="" disabled selected>-- Selecciona un Pupilo --</option>
+                {% for pupilo in mis_pupilos %}
+                    <option value="{{ pupilo.id }}">{{ pupilo.nombre }} - {{ pupilo.curso.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="monto" class="font-weight-bold text-dark">Monto</label>
+            <input type="number" class="form-control" id="monto" name="monto" placeholder="Ingresa el monto" required>
+        </div>
+
+        <div class="form-group text-center">
+            <button type="submit" class="btn btn-primary btn-lg">Registrar Depósito</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
